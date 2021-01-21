@@ -26,14 +26,30 @@ async def on_command_completion(ctx: commands.Context):
 @bot.before_invoke
 async def before_command(ctx):
     if not await bot.is_owner(ctx.message.author):
+        embed = discord.Embed(color=discord.Colour.red())
+        embed.set_footer(text="⛔ You are not authorized to use this bot")
+        await ctx.send(embed=embed, delete_after=6.0)
+        await ctx.message.delete()
         raise commands.CommandError
+
+
+# TODO Add more fields
+@bot.command()
+async def server_stats(ctx: commands.Context):
+
+    server = ctx.guild
+
+    embed = discord.Embed(title=f"{server.name} Stats", color=discord.Colour.blue())
+    embed.add_field(name="Creation date", value=str(server.created_at), inline=False)
+
+    await ctx.send(embed=embed, delete_after=12.0)
 
 
 @bot.command()
 async def backup_users(ctx: commands.Context):
 
     member: discord.Member
-    server: discord.Guild = ctx.message.guild
+    server: discord.Guild = ctx.guild
     users_list = list()
     banned_members = await server.bans()
     server_members_count = len(server.members)
@@ -61,11 +77,12 @@ async def backup_users(ctx: commands.Context):
 
         users_json.write(json.dumps(users_list, sort_keys=True, indent=4))
 
-    embed = discord.Embed(title=f"{server.name} Members", color=0x207dff)
+    embed = discord.Embed(title=f"{server.name} Members", color=discord.Colour.blue())
     embed.add_field(name="Members", value=str(server_members_count), inline=False)
     embed.add_field(name="Banned members", value=str(banned_members_count), inline=False)
+    embed.set_footer(text="✅ Guild users backed up")
 
-    await ctx.send("Guild users backed up :white_check_mark:", embed=embed, delete_after=15.0)
+    await ctx.send(embed=embed, delete_after=12.0)
 
 
 @bot.command()
